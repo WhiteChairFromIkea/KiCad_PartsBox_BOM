@@ -4,6 +4,9 @@
 # Example: Sorted and Grouped CSV BOM
 #
 
+# 2019-11-22 Not working grouping by Comment_assy field!!!!
+#2020-02-03 ' Fixed Not working grouping by Comment_assy field, added "REMOVE_DNP_COMPONENTS" as third argument. use anything els as 3rd argument to list all components.
+
 """
     @package
     Generate a Tab delimited list (csv file type).
@@ -12,7 +15,9 @@
     'Ref', 'Qnty', 'Value', 'Cmp name', 'Footprint', 'Description', 'Vendor'
 
     Command line:
-    python "pathToFile/bom_csv_grouped_by_value_with_fp.py" "%I" "%O.csv"
+    python "pathToFile/PartsBox_BOM.py" "%I" "%O.csv" "REMOVE_DNP_COMPONENTS"
+    or
+    python "pathToFile/PartsBox_BOM.py" "%I" "%O.csv" "LIST_DNP_COMPONENTS"
 """
 
 # Import the KiCad python helper module and the csv formatter
@@ -23,6 +28,7 @@ import sys
 # Generate an instance of a generic netlist, and load the netlist tree from
 # the command line option. If the file doesn't exist, execution will stop
 net = kicad_netlist_reader.netlist(sys.argv[1])
+bShowDnpComponents = sys.argv[3]
 
 # Open a file to write to, if the file cannot be opened output to stdout
 # instead
@@ -53,14 +59,31 @@ grouped = net.groupComponents()
 # Output all of the component information
 for group in grouped:
     refs = ""
+    comments_assy = ""
+    dnp = ""
 
     # Add the reference of every component in the group and keep a reference
     # to the component so that the other data can be filled in once per group
     for component in group:
-        refs += component.getRef() + ", "
-        c = component
+        if(bShowDnpComponents == "REMOVE_DNP_COMPONENTS"):
+            dnp = component.getField("DNP")
+        else:
+            dnp = ""
+        if(not dnp):
+            refs += component.getRef() + ", "
+            cmnt = component.getField("Comment_assy")
+            if(cmnt):
+                comments_assy += cmnt + ", "
+#        print(refs)
+#        print(comments_assy)
+            c = component
+#        print(c.getField("Comment_assy"))
 
     # Fill in the component groups common data
-    out.writerow(["", refs, "", len(group), c.getValue(), c.getField("Comment_assy"), "-", c.getField("DNP"), c.getFootprint(), c.getLibName(), c.getField("Comment_sch"), c.getField("PartsBox"), c.getDescription(), c.getDatasheet(), c.getPartName()])
+    out.writerow(["", refs, "", len(group), c.getValue(), comments_assy, "-", c.getField("DNP"), c.getFootprint(), c.getLibName(), c.getField("Comment_sch"), c.getField("PartsBox"), c.getDescription(), c.getDatasheet(), c.getPartName()])
+
+import os
+os.startfile(sys.argv[2])
+# run sys.argv[2]
 
 
