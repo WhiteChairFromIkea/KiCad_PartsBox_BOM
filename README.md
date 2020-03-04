@@ -11,7 +11,7 @@ File "kicad_netlist_reader.py" must be in the same folder as "PartsBox_BOM.py". 
 # Installation:
  1. Place "PartsBox_BOM.py" inside KiCad 5 plugins folder:   
    a) %appdata%\kicad\scripting\plugins  
-   b) copy directly insie C:\Program Files\KiCad\bin\scripting\plugins  
+   b) copy directly inside C:\Program Files\KiCad\bin\scripting\plugins  
    
  2. Open sch with eeschema, Tools -> Generate Bill of materials..., click "+", locate "kicad_netlist_reader.py". Edit "Command line" field to end with "%O.csv", instead of "%O" to add csv file extension for the output file;  
  3. Click generate;
