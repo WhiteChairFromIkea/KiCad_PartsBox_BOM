@@ -25,6 +25,16 @@ import kicad_netlist_reader
 import csv
 import sys
 
+# ref https://gitlab.com/kicad/code/kicad/-/commit/35f9cd2634f419b994178360963a49f5042c4a70 @Jeff Young
+# A helper function to convert a UTF8/Unicode/locale string read in netlist
+# for python2 or python3
+def fromNetlistText( aText ):
+    try:
+        return aText.encode('utf-8').decode('cp1252')
+    except UnicodeDecodeError:
+        return aText
+
+
 # Generate an instance of a generic netlist, and load the netlist tree from
 # the command line option. If the file doesn't exist, execution will stop
 net = kicad_netlist_reader.netlist(sys.argv[1])
@@ -70,7 +80,7 @@ for group in grouped:
         else:
             dnp = ""
         if(not dnp):
-            refs += component.getRef() + ", "
+            refs += fromNetlistText( component.getRef() ) + ", "
             cmnt = component.getField("Comment_assy")
             if(cmnt):
                 comments_assy += cmnt + ", "
@@ -80,7 +90,18 @@ for group in grouped:
 #        print(c.getField("Comment_assy"))
 
     # Fill in the component groups common data
-    out.writerow(["", refs, "", len(group), c.getValue(), comments_assy, "-", c.getField("DNP"), c.getFootprint(), c.getLibName(), c.getField("Comment_sch"), c.getField("PartsBox"), c.getDescription(), c.getDatasheet(), c.getPartName()])
+    out.writerow(["", refs, "", len(group),
+        fromNetlistText( c.getValue() ),
+        comments_assy,
+        "-",
+        fromNetlistText( c.getField("DNP") ),
+        fromNetlistText( c.getFootprint() ),
+        fromNetlistText( c.getLibName() ),
+        fromNetlistText( c.getField("Comment_sch") ),
+        fromNetlistText( c.getField("PartsBox") ),
+        fromNetlistText( c.getDescription() ),
+        fromNetlistText( c.getDatasheet() ),
+        fromNetlistText( c.getPartName()) ])
 
 import os
 os.startfile(sys.argv[2])
